@@ -118,6 +118,8 @@ expr :
 	// Method call
 	| objectExpr=expr '.' methodId=ID '(' ( expr (',' expr)* )? ')'     #METHOD_CALL_RULE
 	
+	| arrayExpr=expr '[' posExpr=expr ']'                               #ARRAY_ACCESS_RULE
+	
 	| BOOLEAN_TRUE      #BOOLEAN_TRUE_RULE
 	| BOOLEAN_FALSE     #BOOLEAN_FALSE_RULE
 	| THIS              #THIS_RULE
@@ -142,7 +144,6 @@ expr :
 	| 'new' objectId=ID '(' ')'                                         #NEW_OBJECT_RULE
 
 	// Others
-	| arrayExpr=expr '[' posExpr=expr ']'                               #ARRAY_ACCESS_RULE
 	| arrayExpr=expr '.' 'length'                                       #ARRAY_LENGTH_RULE
 	| '(' innerExpr=expr ')'                                            #PARENTHESIS_EXPR_RULE
 	;
