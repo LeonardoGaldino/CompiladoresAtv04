@@ -114,12 +114,15 @@ var_decl : varType=type varId=ID ';' ;
 expr :
 	// Literals
 	INTEGER_LITERAL     #INTEGER_RULE
+	| '(' innerExpr=expr ')'                                            #PARENTHESIS_EXPR_RULE
 
 	// Method call
 	| objectExpr=expr '.' methodId=ID '(' ( expr (',' expr)* )? ')'     #METHOD_CALL_RULE
 	
 	| arrayExpr=expr '[' posExpr=expr ']'                               #ARRAY_ACCESS_RULE
-	
+
+	| NOT_OP notExpr=expr                                               #NOT_OP_RULE
+
 	| BOOLEAN_TRUE      #BOOLEAN_TRUE_RULE
 	| BOOLEAN_FALSE     #BOOLEAN_FALSE_RULE
 	| THIS              #THIS_RULE
@@ -137,7 +140,6 @@ expr :
 
 	// Unary expression
 	| MINUS_OP minusExpr=expr                                           #UNARY_MINUS_OP_RULE
-	| NOT_OP notExpr=expr                                               #NOT_OP_RULE
 
 	// Constructors (array and object)
 	| 'new' 'int' '[' sizeExpr=expr ']'                                 #NEW_ARRAY_RULE
@@ -145,7 +147,6 @@ expr :
 
 	// Others
 	| arrayExpr=expr '.' 'length'                                       #ARRAY_LENGTH_RULE
-	| '(' innerExpr=expr ')'                                            #PARENTHESIS_EXPR_RULE
 	;
 
 statement :
