@@ -114,6 +114,10 @@ var_decl : varType=type varId=ID ';' ;
 expr :
 	// Literals
 	INTEGER_LITERAL     #INTEGER_RULE
+
+	// Method call
+	| objectExpr=expr '.' methodId=ID '(' ( expr (',' expr)* )? ')'     #METHOD_CALL_RULE
+	
 	| BOOLEAN_TRUE      #BOOLEAN_TRUE_RULE
 	| BOOLEAN_FALSE     #BOOLEAN_FALSE_RULE
 	| THIS              #THIS_RULE
@@ -136,9 +140,6 @@ expr :
 	// Constructors (array and object)
 	| 'new' 'int' '[' sizeExpr=expr ']'                                 #NEW_ARRAY_RULE
 	| 'new' objectId=ID '(' ')'                                         #NEW_OBJECT_RULE
-
-	// Method call
-	| objectExpr=expr '.' methodId=ID '(' ( expr (',' expr)* )? ')'     #METHOD_CALL_RULE
 
 	// Others
 	| arrayExpr=expr '[' posExpr=expr ']'                               #ARRAY_ACCESS_RULE
