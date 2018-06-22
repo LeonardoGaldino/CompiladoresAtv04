@@ -130,7 +130,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 	public Type visit(MethodDecl n) {
 		this.currMethod = this.symbolTable.getMethod(n.i.s, this.currClass.getId());
 		n.t.accept(this);
-		n.i.accept(this);
+		Type returnType = n.i.accept(this);
 		for (int i = 0; i < n.fl.size(); i++) {
 			n.fl.elementAt(i).accept(this);
 		}
@@ -140,7 +140,13 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 		for (int i = 0; i < n.sl.size(); i++) {
 			n.sl.elementAt(i).accept(this);
 		}
-		n.e.accept(this);
+		Type returnedType = n.e.accept(this);
+		if(!this.symbolTable.compareTypes(returnType, returnedType)) {
+			String errorMessage = "Returned type doesn't match with method signature " +
+								"on method '%s' at class '%s'";
+			Thrower.throwExceptionWrapper(errorMessage, this.currMethod.getId(),
+								this.currClass.getId());
+		}
 		this.currMethod = null;
 		return null;
 	}
@@ -424,7 +430,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 		n.i.accept(this);
 		this.currClass = tempClass;
 		this.currMethod = tempMethod;
-		
+
 		int i;
 		for (i = 0; i < n.el.size(); i++) {
 			Type p1 = n.el.elementAt(i).accept(this);

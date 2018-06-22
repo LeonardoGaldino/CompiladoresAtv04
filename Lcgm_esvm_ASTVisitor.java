@@ -311,10 +311,6 @@ public class Lcgm_esvm_ASTVisitor implements Lcgm_esvmVisitor<Object> {
 		return arrayLength;
 	}
 
-	/*public Object visitBINARY_THIS_RULE(Lcgm_esvmParser.BINARY_THIS_RULEContext ctx) {
-		return new Object();
-	}*/
-
 	public Object visitBLOCK_RULE(Lcgm_esvmParser.BLOCK_RULEContext ctx) {
 		int numChildren = ctx.getChildCount();
 		StatementList statements = new StatementList();

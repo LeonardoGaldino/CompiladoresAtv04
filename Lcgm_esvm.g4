@@ -28,7 +28,8 @@ fragment POSITIVE_INTEGER : [1-9][0-9]* ;
 
 INTEGER_LITERAL : 
 	ZERO_DIGIT 
-	| POSITIVE_INTEGER;
+	| POSITIVE_INTEGER
+	;
 
 BOOLEAN_TRUE : 'true' ;
 BOOLEAN_FALSE : 'false' ;
@@ -131,12 +132,11 @@ expr :
 	| ID #ID_RULE
 
 	// Binary expressions
+	| expr1=expr MULT_OP expr2=expr                                     #MULT_OP_RULE
 	| expr1=expr ADD_OP expr2=expr                                      #ADD_OP_RULE
 	| expr1=expr MINUS_OP expr2=expr                                    #MINUS_OP_RULE
-	| expr1=expr MULT_OP expr2=expr                                     #MULT_OP_RULE
 	| expr1=expr AND_OP expr2=expr                                      #AND_OP_RULE
 	| expr1=expr LESS_OP expr2=expr                                     #LESS_OP_RULE
-	//| THIS '.' expr1=expr                           #BINARY_THIS_RULE
 
 	// Unary expression
 	| MINUS_OP minusExpr=expr                                           #UNARY_MINUS_OP_RULE
