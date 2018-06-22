@@ -66,10 +66,16 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 	// Identifier i1,i2;
 	// Statement s;
 	public Type visit(MainClass n) {
+		this.symbolTable.addClass("main", null);
 		this.currClass = this.symbolTable.getClass(n.i1.s);
+		this.currClass.addMethod("main", null);
+		this.currMethod = this.currClass.getMethod("main");
+		this.currMethod.addParam(n.i2.s, null);
 		n.i1.accept(this);
-		//n.i2.accept(this);
+		n.i2.accept(this);
 		n.s.accept(this);
+		this.currClass = null;
+		this.currMethod = null;
 		return null;
 	}
 
@@ -85,6 +91,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 		for (int i = 0; i < n.ml.size(); i++) {
 			n.ml.elementAt(i).accept(this);
 		}
+		this.currClass = null;
 		return null;
 	}
 
@@ -102,6 +109,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 		for (int i = 0; i < n.ml.size(); i++) {
 			n.ml.elementAt(i).accept(this);
 		}
+		this.currClass = null;
 		return null;
 	}
 
@@ -133,6 +141,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 			n.sl.elementAt(i).accept(this);
 		}
 		n.e.accept(this);
+		this.currMethod = null;
 		return null;
 	}
 
@@ -158,7 +167,9 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 
 	// String s;
 	public Type visit(IdentifierType n) {
-		return n;
+		if(this.symbolTable.containsClass(n.s))
+			return n;
+		return this.symbolTable.getVarType(this.currMethod, this.currClass, n.s);
 	}
 
 	// StatementList sl;
@@ -384,8 +395,17 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 		}
 		String typeId = ((IdentifierType) expType).s;
 		Class temp = this.symbolTable.getClass(typeId);
-
-		if(!temp.containsMethod(n.i.s)) {
+		
+		while(temp != null) {
+			if(temp.containsMethod(n.i.s))
+				break;
+			String parentClassName = temp.parent();
+			if(parentClassName == null)
+				temp = null;
+			else
+				temp = this.symbolTable.getClass(temp.parent());
+		}
+		if(temp == null) {
 			String errorMessage = "Method '%s' doesn't exists on class '%s'. " +
 								"Occurence on method '%s' at class '%s'";
 			Thrower.throwExceptionWrapper(errorMessage, 
@@ -396,8 +416,15 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 		}
 
 		Method targetMethod = temp.getMethod(n.i.s);
+		Method tempMethod = this.currMethod;
+		Class tempClass = this.currClass;
 
-		//n.i.accept(this);
+		this.currClass = temp;
+		this.currMethod = targetMethod;
+		n.i.accept(this);
+		this.currClass = tempClass;
+		this.currMethod = tempMethod;
+		
 		int i;
 		for (i = 0; i < n.el.size(); i++) {
 			Type p1 = n.el.elementAt(i).accept(this);
@@ -411,8 +438,7 @@ public class TypeCheckVisitor implements IVisitor<Type> {
 										this.currClass.getId());	
 			}
 
-			if(!this.symbolTable.compareTypes(p1, p2.type())
-				&& !this.symbolTable.compareTypes(p2.type(), p1)) {
+			if(!this.symbolTable.compareTypes(p2.type(), p1)) {
 				String errorMessage = "Wrong type on parameter '%d' called '%s' on " +
 									"method '%s' on method '%s' of class '%s'";
 				Thrower.throwExceptionWrapper(errorMessage, 
